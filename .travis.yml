@@ -3,7 +3,8 @@ os:
 
 language: php
 
-before_install:
+before_script:
+  - sudo apt-get install ant
   - wget https://phar.io/releases/phive.phar
   - wget https://phar.io/releases/phive.phar.asc
   - gpg --keyserver hkps.pool.sks-keyservers.net --recv-keys 0x9B2D5D79
