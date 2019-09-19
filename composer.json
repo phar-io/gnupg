@@ -18,7 +18,7 @@
     "issues" : "https://github.com/phar-io/gnupg/issues"
   },
   "require" : {
-    "php" : "^7.2",
+    "php" : "^7.1",
     "phar-io/executor" : "1.0.x-dev",
     "phar-io/filesystem": "1.0.x-dev"
   },
