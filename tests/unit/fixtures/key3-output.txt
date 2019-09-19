@@ -1,0 +1,10 @@
+tru::1:1568838019:0:3:1:5
+pub:-:4096:1:4AA394086372C20A:1405754086:::-:::scESC::::::23::0:
+fpr:::::::::D8406D0D82947747293778314AA394086372C20A:
+uid:-::::1405756091::289DF57E200A124C85D11F2925EFDEB8A073C873::Sebastian Bergmann <sb@sebastian-bergmann.de>::::::::::0:
+uid:-::::1405755788::52BCE402AB18573CD5119485F6BA2820C9440ABF::Sebastian Bergmann <sebastian.bergmann@thephp.cc>::::::::::0:
+uid:-::::1405755775::D9FD13C24239345ED016F9DF9ADD9C8E5A9AE897::Sebastian Bergmann <sebastian@php.net>::::::::::0:
+uid:-::::1405755746::17D116990CFC86A2A7CE9AB4B0AD89677D9C39DF::Sebastian Bergmann <sebastian@phpunit.de>::::::::::0:
+uid:-::::1405755804::4B84144D21595BCB2BCD38F0B255069F981E908D::Sebastian Bergmann <sebastian@thephp.cc>::::::::::0:
+sub:-:4096:1:4FD8369235DF48E2:1405754086::::::e::::::23:
+fpr:::::::::656F8114EE27986181FB4ED14FD8369235DF48E2:

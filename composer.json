@@ -18,8 +18,9 @@
     "issues" : "https://github.com/phar-io/gnupg/issues"
   },
   "require" : {
-    "php" : "^5.6||^7.0",
-    "phar-io/executor" : "1.0.x-dev"
+    "php" : "^7.2",
+    "phar-io/executor" : "1.0.x-dev",
+    "phar-io/filesystem": "1.0.x-dev"
   },
   "autoload": {
     "classmap": [

@@ -1,10 +1,11 @@
-<?php
+<?php declare(strict_types=1);
 namespace PharIo\GnuPG;
 
 use PharIo\Executor\Executor;
 use PharIo\FileSystem\Directory;
 use PharIo\FileSystem\Filename;
 
+/** @noinspection PhpComposerExtensionStubsInspection */
 class Factory {
 
     /**
@@ -21,12 +22,7 @@ class Factory {
         $this->gpgBinary = $gpgBinary;
     }
 
-    /**
-     * @param Directory $homeDirectory
-     *
-     * @return \Gnupg
-     */
-    public function createGnuPG(Directory $homeDirectory) {
+    public function createGnuPG(Directory $homeDirectory): \Gnupg {
         if (extension_loaded('gnupg')) {
             putenv('GNUPGHOME=' . (string)$homeDirectory);
             $gpg = new \Gnupg();

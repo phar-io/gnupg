@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 namespace PharIo\GnuPG;
 
 use PharIo\Executor\Executor;
@@ -7,7 +7,9 @@ use PharIo\FileSystem\Filename;
 
 /**
  * This is a (thin) wrapper around the gnupg binary, mimicking the pecl/gnupg api
- * Currently, only the two methods required by phive (import and verify) are implemented
+ * Currently, only the three methods required by phive (import, info and verify) are implemented
+ *
+ * NOTE: The implementation may not be complete enough to be useful for other purposes
  */
 class GnuPG {
 
@@ -25,14 +27,15 @@ class GnuPG {
      * @var Directory
      */
     private $tmpDirectory;
+
     /**
      * @var Filename
      */
     private $gpgBinary;
 
     /**
-     * @param Executor $executor
-     * @param Filename $gpgBinary
+     * @param Executor  $executor
+     * @param Filename  $gpgBinary
      * @param Directory $tmpDirectory
      * @param Directory $homeDirectory
      */
@@ -43,12 +46,7 @@ class GnuPG {
         $this->homeDirectory = $homeDirectory;
     }
 
-    /**
-     * @param string $key
-     *
-     * @return array
-     */
-    public function import($key) {
+    public function import(string $key): array {
         $tmpFile = $this->createTemporaryFile($key);
         $result = $this->execute([
             '--import',
@@ -62,16 +60,24 @@ class GnuPG {
                 'fingerprint' => $matches[2]
             ];
         }
+
         return ['imported' => 0];
     }
 
+    public function keyinfo(string $search): array {
+        $result = $this->execute([
+            '--list-keys',
+            '--with-fingerprint',
+            escapeshellarg($search)
+        ]);
+
+        return $this->parseInfoOutput($result);
+    }
+
     /**
-     * @param string $message
-     * @param string $signature
-     *
      * @return array|false
      */
-    public function verify($message, $signature) {
+    public function verify(string $message, string $signature) {
         $messageFile = $this->createTemporaryFile($message);
         $signatureFile = $this->createTemporaryFile($signature);
 
@@ -88,15 +94,13 @@ class GnuPG {
     }
 
     /**
-     * @param $status
-     *
      * @return array|false
      */
-    private function parseVerifyOutput($status) {
+    private function parseVerifyOutput(array $status) {
         $fingerprint = '';
         $timestamp = 0;
         $summary = false;
-        foreach ($status as $line) {
+        foreach($status as $line) {
             $parts = explode(' ', $line);
             if (count($parts) < 3) {
                 continue;
@@ -159,7 +163,7 @@ class GnuPG {
      */
     private function getDefaultGpgParams() {
         return [
-            '--homedir ' . escapeshellarg($this->homeDirectory),
+            '--homedir ' . escapeshellarg((string)$this->homeDirectory),
             '--quiet',
             '--status-fd 1',
             '--lock-multiple',
@@ -167,7 +171,8 @@ class GnuPG {
             '--no-greeting',
             '--exit-on-status-write-error',
             '--batch',
-            '--no-tty'
+            '--no-tty',
+            '--with-colons'
         ];
     }
 
@@ -186,18 +191,133 @@ class GnuPG {
             $devNull
         );
         $result = $this->executor->execute($this->gpgBinary, $argLine);
+
         return $result->getOutput();
     }
 
-    /**
-     * @param string $content
-     *
-     * @return Filename
-     */
-    private function createTemporaryFile($content) {
+    private function createTemporaryFile($content): Filename {
         $tmpFile = $this->tmpDirectory->file(uniqid('phive_gpg_', true));
         $tmpFile->putContent($content);
+
         return $tmpFile;
     }
 
+    private function parseInfoOutput(array $result): array {
+        //
+        // Fragment docs @  https://git.gnupg.org/cgi-bin/gitweb.cgi?p=gnupg.git;a=blob_plain;f=doc/DETAILS
+        //
+
+        $key = [];
+        $uids = [];
+        $subkeys = [];
+
+        foreach($result as $line) {
+            $fragments = explode(':', $line);
+
+            switch ($fragments[0]) {
+                case 'sub':
+                case 'pub':
+                {
+                    $subkeys[] = array_merge(
+                        [
+                            'keyid'     => $fragments[4],
+                            'timestamp' => (int)$fragments[5],
+                            'expires'   => (int)$fragments[6]
+                        ],
+                        $this->parseCapabilities($fragments[11]),
+                        $this->parseValidity($fragments[1])
+                    );
+
+                    if (empty($key)) {
+                        $key = array_merge(
+                            $this->parseValidity($fragments[1]),
+                            $this->parseCapabilities($fragments[11])
+                        );
+                    }
+                    break;
+                }
+
+                case 'fpr':
+                {
+                    $subkeys[] = array_merge(
+                        ['fingerprint' => $fragments[9]],
+                        array_pop($subkeys)
+                    );
+                    break;
+                }
+
+                case 'uid':
+                {
+                    preg_match('/(.*)\s<(.*)>/', $fragments[9], $matches);
+
+                    $uids[] = array_merge(
+                        [
+                            'name'    => $matches[1],
+                            'comment' => '',
+                            'email'   => $matches[2],
+                            'uid'     => $fragments[9],
+                        ],
+                        $this->parseValidity($fragments[1])
+                    );
+                    break;
+                }
+            }
+        }
+
+        $key['uids'] = $uids;
+        $key['subkeys'] = $subkeys;
+
+        return [$key];
+    }
+
+    private function parseValidity(string $flag): array {
+        static $map = [
+            'i' => 'invalid',
+            'd' => 'disabled',
+            'r' => 'revoked',
+            'e' => 'expired',
+            'n' => 'invalid'
+        ];
+
+        $parsed = [
+            'disabled' => false,
+            'expired'  => false,
+            'revoked'  => false,
+            'invalid'  => false
+        ];
+
+        if (isset($map[$flag])) {
+            $parsed[$map[$flag]] = true;
+        }
+
+        return $parsed;
+    }
+
+    private function parseCapabilities(string $flags): array {
+        /*
+         * - e :: Encrypt
+         * - s :: Sign
+         * - c :: Certify
+         * - a :: Authentication
+         * - ? :: Unknown capability
+         */
+
+        $result = [
+            'can_encrypt' => false,
+            'can_sign'    => false
+        ];
+
+        static $map = [
+            's' => 'can_sign',
+            'e' => 'can_encrypt'
+        ];
+
+        foreach(\str_split(\strtolower($flags), 1) as $char) {
+            if (isset($map[$char])) {
+                $result[$map[$char]] = true;
+            }
+        }
+
+        return $result;
+    }
 }

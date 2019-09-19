@@ -27,6 +27,8 @@ class GnuPGTest extends TestCase {
         $gpgBinary = $this->getFilenameMock();
 
         $tmpFile = $this->getFilenameMock();
+        $tmpFile->method('asString')->willReturn(\uniqid('test', true));
+
         $tmpDirectory = $this->getDirectoryMock();
         $tmpDirectory->method('file')->willReturn($tmpFile);
 
@@ -71,6 +73,8 @@ class GnuPGTest extends TestCase {
         $gpgBinary = $this->getFilenameMock();
 
         $tmpFile = $this->getFilenameMock();
+        $tmpFile->method('asString')->willReturn(\uniqid('test', true));
+
         $tmpDirectory = $this->getDirectoryMock();
         $tmpDirectory->method('file')->willReturn($tmpFile);
 
@@ -133,6 +137,51 @@ class GnuPGTest extends TestCase {
             [
                 'executionOutput' => ['SOME ERROR'],
                 'expectedResult' => false
+            ]
+        ];
+    }
+
+    /**
+     * @dataProvider infoExecutionResultProvider
+     *
+     * @param $executionOutput
+     * @param array $expectedResult
+     */
+    public function testInfoReturnsExpectedArray($executionOutput, $expectedResult) {
+            $executorResult = $this->getExecutorResultMock();
+            $executorResult->method('getOutput')->willReturn($executionOutput);
+            $executor = $this->getExecutorMock();
+            $executor->method('execute')->willReturn($executorResult);
+
+            $gpgBinary = $this->getFilenameMock();
+
+            $tmpFile = $this->getFilenameMock();
+            $tmpFile->method('asString')->willReturn(\uniqid('test', true));
+
+            $tmpDirectory = $this->getDirectoryMock();
+            $tmpDirectory->method('file')->willReturn($tmpFile);
+
+            $homeDirectory = $this->getDirectoryMock();
+            $gpg = new GnuPG($executor, $gpgBinary, $tmpDirectory, $homeDirectory);
+
+            $actual = $gpg->keyinfo('someKeyIdentifier');
+
+            $this->assertEquals($expectedResult, $actual);
+    }
+
+    public function infoExecutionResultProvider() {
+        return [
+            'key1' => [
+                'executionOutput' => file(__DIR__ . '/fixtures/key1-output.txt'),
+                'expectedResult' => include __DIR__ . '/fixtures/key1-array.php'
+            ],
+            'key2' => [
+                'executionOutput' => file(__DIR__ . '/fixtures/key2-output.txt'),
+                'expectedResult' => include __DIR__ . '/fixtures/key2-array.php'
+            ],
+            'key3' => [
+                'executionOutput' => file(__DIR__ . '/fixtures/key3-output.txt'),
+                'expectedResult' => include __DIR__ . '/fixtures/key3-array.php'
             ]
         ];
     }
