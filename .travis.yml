@@ -12,6 +12,7 @@ before_script:
   - chmod +x phive.phar
   - sudo mv phive.phar /usr/bin/phive
   - ant setup
+  - composer install
 
 script: ./tools/phpunit
 
