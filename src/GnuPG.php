@@ -68,6 +68,8 @@ class GnuPG {
         $result = $this->execute([
             '--list-keys',
             '--with-fingerprint',
+            '--with-fingerprint', // duplication intentional
+            '--fixed-list-mode',
             escapeshellarg($search)
         ]);
 
