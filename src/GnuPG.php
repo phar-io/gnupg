@@ -2,43 +2,33 @@
 namespace PharIo\GnuPG;
 
 use PharIo\Executor\Executor;
+use PharIo\Executor\ExecutorResult;
 use PharIo\FileSystem\Directory;
 use PharIo\FileSystem\Filename;
 
 /**
  * This is a (thin) wrapper around the gnupg binary, mimicking the pecl/gnupg api
- * Currently, only the three methods required by phive (import, info and verify) are implemented
+ * Currently, only the methods required by phive (import, info, geterror and verify) are implemented
  *
  * NOTE: The implementation may not be complete enough to be useful for other purposes
  */
 class GnuPG {
 
-    /**
-     * @var Executor
-     */
+    /** @var Executor */
     private $executor;
 
-    /**
-     * @var Directory
-     */
+    /** @var Directory */
     private $homeDirectory;
 
-    /**
-     * @var Directory
-     */
+    /** @var Directory */
     private $tmpDirectory;
 
-    /**
-     * @var Filename
-     */
+    /** @var Filename */
     private $gpgBinary;
 
-    /**
-     * @param Executor  $executor
-     * @param Filename  $gpgBinary
-     * @param Directory $tmpDirectory
-     * @param Directory $homeDirectory
-     */
+    /** @var int */
+    private $lastExitCode = -1;
+
     public function __construct(Executor $executor, Filename $gpgBinary, Directory $tmpDirectory, Directory $homeDirectory) {
         $this->executor = $executor;
         $this->gpgBinary = $gpgBinary;
@@ -51,7 +41,7 @@ class GnuPG {
         $result = $this->execute([
             '--import',
             escapeshellarg($tmpFile->asString())
-        ]);
+        ])->getOutput();
         $tmpFile->delete();
 
         if (preg_match('=.*IMPORT_OK\s(\d+)\s(.*)=', implode('', $result), $matches)) {
@@ -71,7 +61,7 @@ class GnuPG {
             '--with-fingerprint', // duplication intentional
             '--fixed-list-mode',
             escapeshellarg($search)
-        ]);
+        ])->getOutput();
 
         return $this->parseInfoOutput($result);
     }
@@ -92,13 +82,24 @@ class GnuPG {
         $signatureFile->delete();
         $messageFile->delete();
 
-        return $this->parseVerifyOutput($result);
+        return $this->parseVerifyOutput($result->getOutput(), $result->getExitCode());
+    }
+
+    /**
+     * @return string|false
+     */
+    public function geterror() {
+        if ($this->lastExitCode === -1) {
+            return false;
+        }
+
+        return ErrorStrings::fromCode($this->lastExitCode);
     }
 
     /**
      * @return array|false
      */
-    private function parseVerifyOutput(array $status) {
+    private function parseVerifyOutput(array $status, int $exitCode) {
         $fingerprint = '';
         $timestamp = 0;
         $summary = false;
@@ -155,7 +156,7 @@ class GnuPG {
             'fingerprint' => $fingerprint,
             'validity'    => 0,
             'timestamp'   => $timestamp,
-            'status'      => $status,
+            'status'      => $exitCode,
             'summary'     => $summary
         ]];
     }
@@ -181,9 +182,9 @@ class GnuPG {
     /**
      * @param string[] $params
      *
-     * @return mixed
+     * @return ExecutorResult
      */
-    private function execute(array $params) {
+    private function execute(array $params): ExecutorResult {
         $devNull = stripos(PHP_OS, 'win') === 0 ? 'nul' : '/dev/null';
 
         $argLine = sprintf(
@@ -192,9 +193,11 @@ class GnuPG {
             implode(' ', $params),
             $devNull
         );
-        $result = $this->executor->execute($this->gpgBinary, $argLine);
 
-        return $result->getOutput();
+        $result = $this->executor->execute($this->gpgBinary, $argLine);
+        $this->lastExitCode = $result->getExitCode();
+
+        return $result;
     }
 
     private function createTemporaryFile($content): Filename {

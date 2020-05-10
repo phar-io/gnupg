@@ -8,3 +8,5 @@
 /tools
 /vendor
 cache.properties
+string_def.txt
+.phpunit.result.cache
