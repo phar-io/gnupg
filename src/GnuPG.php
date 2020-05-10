@@ -30,21 +30,21 @@ class GnuPG {
     private $lastExitCode = -1;
 
     public function __construct(Executor $executor, Filename $gpgBinary, Directory $tmpDirectory, Directory $homeDirectory) {
-        $this->executor = $executor;
-        $this->gpgBinary = $gpgBinary;
-        $this->tmpDirectory = $tmpDirectory;
+        $this->executor      = $executor;
+        $this->gpgBinary     = $gpgBinary;
+        $this->tmpDirectory  = $tmpDirectory;
         $this->homeDirectory = $homeDirectory;
     }
 
     public function import(string $key): array {
         $tmpFile = $this->createTemporaryFile($key);
-        $result = $this->execute([
+        $result  = $this->execute([
             '--import',
-            escapeshellarg($tmpFile->asString())
+            \escapeshellarg($tmpFile->asString())
         ])->getOutput();
         $tmpFile->delete();
 
-        if (preg_match('=.*IMPORT_OK\s(\d+)\s(.*)=', implode('', $result), $matches)) {
+        if (\preg_match('=.*IMPORT_OK\s(\d+)\s(.*)=', \implode('', $result), $matches)) {
             return [
                 'imported'    => (int)$matches[1],
                 'fingerprint' => $matches[2]
@@ -60,7 +60,7 @@ class GnuPG {
             '--with-fingerprint',
             '--with-fingerprint', // duplication intentional
             '--fixed-list-mode',
-            escapeshellarg($search)
+            \escapeshellarg($search)
         ])->getOutput();
 
         return $this->parseInfoOutput($result);
@@ -70,13 +70,13 @@ class GnuPG {
      * @return array|false
      */
     public function verify(string $message, string $signature) {
-        $messageFile = $this->createTemporaryFile($message);
+        $messageFile   = $this->createTemporaryFile($message);
         $signatureFile = $this->createTemporaryFile($signature);
 
         $result = $this->execute([
             '--verify',
-            escapeshellarg($signatureFile->asString()),
-            escapeshellarg($messageFile->asString())
+            \escapeshellarg($signatureFile->asString()),
+            \escapeshellarg($messageFile->asString())
         ]);
 
         $signatureFile->delete();
@@ -86,7 +86,7 @@ class GnuPG {
     }
 
     /**
-     * @return string|false
+     * @return false|string
      */
     public function geterror() {
         if ($this->lastExitCode === -1) {
@@ -101,16 +101,18 @@ class GnuPG {
      */
     private function parseVerifyOutput(array $status, int $exitCode) {
         $fingerprint = '';
-        $timestamp = 0;
-        $summary = false;
-        foreach($status as $line) {
-            $parts = explode(' ', $line);
-            if (count($parts) < 3) {
+        $timestamp   = 0;
+        $summary     = false;
+
+        foreach ($status as $line) {
+            $parts = \explode(' ', $line);
+
+            if (\count($parts) < 3) {
                 continue;
             }
             $fingerprint = $parts[2];
 
-            if (strpos($line, 'VALIDSIG') !== false) {
+            if (\strpos($line, 'VALIDSIG') !== false) {
                 // [GNUPG:] VALIDSIG D8406D0D82947747{...}A394072C20A 2014-07-19 1405769272 0 4 0 1 10 00 D8{...}C20A
                 /*
                 VALIDSIG <args>
@@ -129,21 +131,24 @@ class GnuPG {
                 - [ <primary-key-fpr> ]
                 */
                 $timestamp = $parts[4];
-                $summary = 0;
+                $summary   = 0;
+
                 break;
             }
 
-            if (strpos($line, 'BADSIG') !== false) {
+            if (\strpos($line, 'BADSIG') !== false) {
                 // [GNUPG:] BADSIG 4AA394086372C20A Sebastian Bergmann <sb@sebastian-bergmann.de>
                 $summary = 4;
+
                 break;
             }
 
-            if (strpos($line, 'ERRSIG') !== false) {
+            if (\strpos($line, 'ERRSIG') !== false) {
                 // [GNUPG:] ERRSIG 4AA394086372C20A 1 10 00 1405769272 9
                 // ERRSIG  <keyid>  <pkalgo> <hashalgo> <sig_class> <time> <rc>
                 $timestamp = $parts[6];
-                $summary = 128;
+                $summary   = 128;
+
                 break;
             }
         }
@@ -164,9 +169,9 @@ class GnuPG {
     /**
      * @return string[]
      */
-    private function getDefaultGpgParams() {
+    private function getDefaultGpgParams(): array {
         return [
-            '--homedir ' . escapeshellarg((string)$this->homeDirectory),
+            '--homedir ' . \escapeshellarg((string)$this->homeDirectory),
             '--quiet',
             '--status-fd 1',
             '--lock-multiple',
@@ -181,27 +186,25 @@ class GnuPG {
 
     /**
      * @param string[] $params
-     *
-     * @return ExecutorResult
      */
     private function execute(array $params): ExecutorResult {
-        $devNull = stripos(PHP_OS, 'win') === 0 ? 'nul' : '/dev/null';
+        $devNull = \stripos(\PHP_OS, 'win') === 0 ? 'nul' : '/dev/null';
 
-        $argLine = sprintf(
+        $argLine = \sprintf(
             '%s %s 2>%s',
-            implode(' ', $this->getDefaultGpgParams()),
-            implode(' ', $params),
+            \implode(' ', $this->getDefaultGpgParams()),
+            \implode(' ', $params),
             $devNull
         );
 
-        $result = $this->executor->execute($this->gpgBinary, $argLine);
+        $result             = $this->executor->execute($this->gpgBinary, $argLine);
         $this->lastExitCode = $result->getExitCode();
 
         return $result;
     }
 
     private function createTemporaryFile($content): Filename {
-        $tmpFile = $this->tmpDirectory->file(uniqid('phive_gpg_', true));
+        $tmpFile = $this->tmpDirectory->file(\uniqid('phive_gpg_', true));
         $tmpFile->putContent($content);
 
         return $tmpFile;
@@ -212,18 +215,18 @@ class GnuPG {
         // Fragment docs @  https://git.gnupg.org/cgi-bin/gitweb.cgi?p=gnupg.git;a=blob_plain;f=doc/DETAILS
         //
 
-        $key = [];
-        $uids = [];
+        $key     = [];
+        $uids    = [];
         $subkeys = [];
 
-        foreach($result as $line) {
-            $fragments = explode(':', $line);
+        foreach ($result as $line) {
+            $fragments = \explode(':', $line);
 
             switch ($fragments[0]) {
                 case 'sub':
                 case 'pub':
                 {
-                    $subkeys[] = array_merge(
+                    $subkeys[] = \array_merge(
                         [
                             'keyid'     => $fragments[4],
                             'timestamp' => (int)$fragments[5],
@@ -234,28 +237,30 @@ class GnuPG {
                     );
 
                     if (empty($key)) {
-                        $key = array_merge(
+                        $key = \array_merge(
                             $this->parseValidity($fragments[1]),
                             $this->parseCapabilities($fragments[11])
                         );
                     }
+
                     break;
                 }
 
                 case 'fpr':
                 {
-                    $subkeys[] = array_merge(
+                    $subkeys[] = \array_merge(
                         ['fingerprint' => $fragments[9]],
-                        array_pop($subkeys)
+                        \array_pop($subkeys)
                     );
+
                     break;
                 }
 
                 case 'uid':
                 {
-                    preg_match('/(.*)\s<(.*)>/', $fragments[9], $matches);
+                    \preg_match('/(.*)\s<(.*)>/', $fragments[9], $matches);
 
-                    $uids[] = array_merge(
+                    $uids[] = \array_merge(
                         [
                             'name'    => $matches[1],
                             'comment' => '',
@@ -264,12 +269,13 @@ class GnuPG {
                         ],
                         $this->parseValidity($fragments[1])
                     );
+
                     break;
                 }
             }
         }
 
-        $key['uids'] = $uids;
+        $key['uids']    = $uids;
         $key['subkeys'] = $subkeys;
 
         return [$key];
@@ -317,7 +323,7 @@ class GnuPG {
             'e' => 'can_encrypt'
         ];
 
-        foreach(\str_split(\strtolower($flags), 1) as $char) {
+        foreach (\str_split(\strtolower($flags), 1) as $char) {
             if (isset($map[$char])) {
                 $result[$map[$char]] = true;
             }

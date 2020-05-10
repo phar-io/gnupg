@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php declare(strict_types = 1);
 namespace PharIo\GnuPG;
 
 use PharIo\Executor\Executor;
@@ -8,9 +8,7 @@ use PharIo\FileSystem\Filename;
 /** @noinspection PhpComposerExtensionStubsInspection */
 class Factory {
 
-    /**
-     * @var Filename
-     */
+    /** @var Filename */
     private $gpgBinary;
 
     /**
@@ -23,10 +21,11 @@ class Factory {
     }
 
     public function createGnuPG(Directory $homeDirectory): \Gnupg {
-        if (extension_loaded('gnupg')) {
-            putenv('GNUPGHOME=' . (string)$homeDirectory);
+        if (\extension_loaded('gnupg')) {
+            \putenv('GNUPGHOME=' . (string)$homeDirectory);
             $gpg = new \Gnupg();
             $gpg->seterrormode(\Gnupg::ERROR_EXCEPTION);
+
             return $gpg;
         }
 
@@ -37,8 +36,8 @@ class Factory {
             $homeDirectory
         );
 
-        if (!class_exists('\Gnupg')) {
-            class_alias(GnuPG::class, '\Gnupg');
+        if (!\class_exists('\Gnupg')) {
+            \class_alias(GnuPG::class, '\Gnupg');
         }
 
         /** @var \Gnupg $gpg */
@@ -46,29 +45,24 @@ class Factory {
     }
 
     /**
-     * @return Filename
-     *
      * @throws Exception
      */
-    private function getGPGBinaryPath() {
+    private function getGPGBinaryPath(): Filename {
         if ($this->gpgBinary === null) {
-            $which = stripos(PHP_OS, 'WIN') === 0 ? 'where.exe' : 'which';
-            $result = exec(sprintf('%s %s', $which, 'gpg'), $output, $exitCode);
+            $which  = \stripos(\PHP_OS, 'WIN') === 0 ? 'where.exe' : 'which';
+            $result = \exec(\sprintf('%s %s', $which, 'gpg'), $output, $exitCode);
+
             if ($exitCode !== 0) {
                 throw new Exception('No gnupg binary found - please specify or install the pecl/gnupg extension.');
             }
-            $resultLines     = explode("\n", $result);
+            $resultLines     = \explode("\n", $result);
             $this->gpgBinary = new Filename($resultLines[0]);
         }
 
         return $this->gpgBinary;
     }
 
-    /**
-     * @return Directory
-     */
-    private function getTempDirectory() {
-        return new Directory(sys_get_temp_dir());
+    private function getTempDirectory(): Directory {
+        return new Directory(\sys_get_temp_dir());
     }
-
 }
