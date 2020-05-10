@@ -24,7 +24,7 @@ class Factory {
         if (\extension_loaded('gnupg')) {
             \putenv('GNUPGHOME=' . (string)$homeDirectory);
             $gpg = new \Gnupg();
-            $gpg->seterrormode(\Gnupg::ERROR_EXCEPTION);
+            $gpg->seterrormode(\Gnupg::ERROR_SILENT);
 
             return $gpg;
         }
