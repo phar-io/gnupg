@@ -1,10 +1,10 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ee12c1d719ade22205efc891d695dec2",
+    "content-hash": "cf31ecf3f85a6941f6086493f53bcdf9",
     "packages": [
         {
             "name": "phar-io/executor",
@@ -51,7 +51,7 @@
                     "role": "Developer"
                 }
             ],
-            "time": "2017-03-19 16:06:49"
+            "time": "2017-03-19T16:06:49+00:00"
         },
         {
             "name": "phar-io/filesystem",
@@ -59,16 +59,16 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/phar-io/filesystem.git",
-                "reference": "2084062b925c0f63a5825f43dfdcd1fc08d1f308"
+                "reference": "5691b052daba3d179e6aef064a02ebfa5e8c7d1e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phar-io/filesystem/zipball/2084062b925c0f63a5825f43dfdcd1fc08d1f308",
-                "reference": "2084062b925c0f63a5825f43dfdcd1fc08d1f308",
+                "url": "https://api.github.com/repos/phar-io/filesystem/zipball/5691b052daba3d179e6aef064a02ebfa5e8c7d1e",
+                "reference": "5691b052daba3d179e6aef064a02ebfa5e8c7d1e",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.6.0"
+                "php": "^7.2"
             },
             "type": "library",
             "extra": {
@@ -97,7 +97,7 @@
                     "role": "Developer"
                 }
             ],
-            "time": "2017-03-19 16:09:48"
+            "time": "2020-05-09T22:26:02+00:00"
         }
     ],
     "packages-dev": [],
@@ -109,7 +109,7 @@
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=5.6.0"
+        "php": "^7.2"
     },
     "platform-dev": []
 }
