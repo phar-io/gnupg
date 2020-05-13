@@ -19,8 +19,8 @@
   },
   "require" : {
     "php" : "^7.1",
-    "phar-io/executor" : "1.0.x-dev",
-    "phar-io/filesystem": "1.0.x-dev"
+    "phar-io/executor" : "^0.9",
+    "phar-io/filesystem": "^0.9"
   },
   "autoload": {
     "classmap": [

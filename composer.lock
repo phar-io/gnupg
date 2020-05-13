@@ -1,27 +1,27 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ee12c1d719ade22205efc891d695dec2",
+    "content-hash": "c9faa59c713abce578dcbe0256246986",
     "packages": [
         {
             "name": "phar-io/executor",
-            "version": "dev-master",
+            "version": "0.9.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phar-io/executor.git",
-                "reference": "73ee06f202bf07acc6d2da9bb383bda3e91784ba"
+                "reference": "961a28ec0343b229a6ab593d0996db3ccdfbc346"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phar-io/executor/zipball/73ee06f202bf07acc6d2da9bb383bda3e91784ba",
-                "reference": "73ee06f202bf07acc6d2da9bb383bda3e91784ba",
+                "url": "https://api.github.com/repos/phar-io/executor/zipball/961a28ec0343b229a6ab593d0996db3ccdfbc346",
+                "reference": "961a28ec0343b229a6ab593d0996db3ccdfbc346",
                 "shasum": ""
             },
             "require": {
-                "phar-io/filesystem": "1.0.x-dev",
+                "phar-io/filesystem": "^0.9",
                 "php": ">=5.6.0"
             },
             "type": "library",
@@ -51,20 +51,20 @@
                     "role": "Developer"
                 }
             ],
-            "time": "2017-03-19 16:06:49"
+            "time": "2020-05-13T19:56:29+00:00"
         },
         {
             "name": "phar-io/filesystem",
-            "version": "dev-master",
+            "version": "0.9.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phar-io/filesystem.git",
-                "reference": "2084062b925c0f63a5825f43dfdcd1fc08d1f308"
+                "reference": "6051c0b17e93721102f54f21676091187fe581c0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phar-io/filesystem/zipball/2084062b925c0f63a5825f43dfdcd1fc08d1f308",
-                "reference": "2084062b925c0f63a5825f43dfdcd1fc08d1f308",
+                "url": "https://api.github.com/repos/phar-io/filesystem/zipball/6051c0b17e93721102f54f21676091187fe581c0",
+                "reference": "6051c0b17e93721102f54f21676091187fe581c0",
                 "shasum": ""
             },
             "require": {
@@ -97,19 +97,17 @@
                     "role": "Developer"
                 }
             ],
-            "time": "2017-03-19 16:09:48"
+            "time": "2020-05-09T15:30:44+00:00"
         }
     ],
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "phar-io/executor": 20
-    },
+    "stability-flags": [],
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=5.6.0"
+        "php": "^7.1"
     },
     "platform-dev": []
 }
