@@ -171,7 +171,7 @@ class GnuPG {
      */
     private function getDefaultGpgParams(): array {
         return [
-            '--homedir ' . \escapeshellarg((string)$this->homeDirectory),
+            '--homedir ' . \escapeshellarg($this->homeDirectory->asString()),
             '--quiet',
             '--status-fd 1',
             '--lock-multiple',

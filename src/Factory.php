@@ -22,7 +22,7 @@ class Factory {
 
     public function createGnuPG(Directory $homeDirectory): \Gnupg {
         if (\extension_loaded('gnupg')) {
-            \putenv('GNUPGHOME=' . (string)$homeDirectory);
+            \putenv('GNUPGHOME=' . $homeDirectory->asString());
             $gpg = new \Gnupg();
             $gpg->seterrormode(\Gnupg::ERROR_SILENT);
 
@@ -55,7 +55,7 @@ class Factory {
             if ($exitCode !== 0) {
                 throw new Exception('No gnupg binary found - please specify or install the pecl/gnupg extension.');
             }
-            $resultLines     = \explode("\n", $result);
+            $resultLines     = \explode("\n", $result, 2);
             $this->gpgBinary = new Filename($resultLines[0]);
         }
 

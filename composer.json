@@ -19,8 +19,8 @@
   },
   "require" : {
     "php" : "^7.2",
-    "phar-io/executor" : "1.0.x-dev",
-    "phar-io/filesystem": "^1.0"
+    "phar-io/executor" : "^1.0",
+    "phar-io/filesystem": "^2.0"
   },
   "autoload": {
     "classmap": [
@@ -28,10 +28,5 @@
     ]
   },
   "minimum-stability" : "dev",
-  "prefer-stable" : true,
-  "extra": {
-    "branch-alias": {
-      "dev-master": "1.0.x-dev"
-    }
-  }
+  "prefer-stable" : true
 }
