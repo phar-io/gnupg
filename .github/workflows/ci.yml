@@ -53,7 +53,7 @@ jobs:
       - name: Install tools
         env:
           GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: phive --no-progress install --trust-gpg-keys 4AA394086372C20A,2A8299CE842DD38C
+        run: phive --no-progress install --trust-gpg-keys 4AA394086372C20A,2A8299CE842DD38C,E82B2FB314E9906E
 
       - name: Test
         run: php tools/phpunit
