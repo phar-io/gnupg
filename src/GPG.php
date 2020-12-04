@@ -22,17 +22,13 @@ interface GPG
      * @throws InvalidHomeDirectory
      * @throws InvalidKey
      */
-    public function importSecretKey(string $keyData): SecretKey;
+    public function importSecretKey(string $keyData, ?string $passphrase = null): SecretKey;
 
     /**
      * Verifies the message is signed with the sigature
      *
-     * Ensures that the signature is valid.
-     *
-     * @throws VerificiationFailed When message was not signed with the signature
-     * @throws UnknownFingerPrint When signature doesn't belong to a known key, key must be imported first
      */
-    public function verify(string $message, Signature $signature): KeyInfo;
+    public function verify(string $message, SignatureData $signature): Signature;
 
     /**
      * Uses the secret to create a signature.
