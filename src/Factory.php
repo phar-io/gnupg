@@ -16,7 +16,7 @@ class Factory {
      *
      * @param Filename $gpgBinary
      */
-    public function __construct(Filename $gpgBinary = null) {
+    public function __construct(?Filename $gpgBinary = null) {
         $this->gpgBinary = $gpgBinary;
     }
 
